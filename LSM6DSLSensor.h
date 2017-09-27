@@ -49,6 +49,7 @@
 #include "LSM6DSL_acc_gyro_driver.h"
 #include "MotionSensor.h"
 #include "GyroSensor.h"
+#include <assert.h>
 
 /* Defines -------------------------------------------------------------------*/
 
@@ -125,8 +126,7 @@ typedef struct
 class LSM6DSLSensor : public MotionSensor, public GyroSensor
 {
   public:
-    LSM6DSLSensor(DevI2C &i2c, PinName INT1_pin, PinName INT2_pin);
-    LSM6DSLSensor(DevI2C &i2c, PinName INT1_pin, PinName INT2_pin, uint8_t address);
+    LSM6DSLSensor(DevI2C *i2c, uint8_t address=LSM6DSL_ACC_GYRO_I2C_ADDRESS_HIGH, PinName INT1_pin=NC, PinName INT2_pin=NC);
     virtual int init(void *init);
     virtual int read_id(uint8_t *id);
     virtual int get_x_axes(int32_t *pData);
@@ -249,7 +249,7 @@ class LSM6DSLSensor : public MotionSensor, public GyroSensor
      */
     uint8_t io_read(uint8_t* pBuffer, uint8_t RegisterAddr, uint16_t NumByteToRead)
     {
-        return (uint8_t) _dev_i2c.i2c_read(pBuffer, _address, RegisterAddr, NumByteToRead);
+        return (uint8_t) _dev_i2c->i2c_read(pBuffer, _address, RegisterAddr, NumByteToRead);
     }
     
     /**
@@ -261,7 +261,7 @@ class LSM6DSLSensor : public MotionSensor, public GyroSensor
      */
     uint8_t io_write(uint8_t* pBuffer, uint8_t RegisterAddr, uint16_t NumByteToWrite)
     {
-        return (uint8_t) _dev_i2c.i2c_write(pBuffer, _address, RegisterAddr, NumByteToWrite);
+        return (uint8_t) _dev_i2c->i2c_write(pBuffer, _address, RegisterAddr, NumByteToWrite);
     }
 
   private:
@@ -271,13 +271,13 @@ class LSM6DSLSensor : public MotionSensor, public GyroSensor
     int set_g_odr_when_disabled(float odr);
 
     /* Helper classes. */
-    DevI2C &_dev_i2c;
-
-    InterruptIn _int1_irq;
-    InterruptIn _int2_irq;
+    DevI2C *_dev_i2c;
 
     /* Configuration */
     uint8_t _address;
+    DigitalOut  _cs_pin;        
+    InterruptIn _int1_irq;
+    InterruptIn _int2_irq;
     
     uint8_t _x_is_enabled;
     float _x_last_odr;
