@@ -44,6 +44,26 @@
 
 /* Class Implementation ------------------------------------------------------*/
 
+LSM6DSLSensor::LSM6DSLSensor(SPI *spi, PinName cs_pin, PinName int1_pin, PinName int2_pin, SPI_type_t spi_type ) : 
+                             _dev_spi(spi), _cs_pin(cs_pin), _int1_irq(int1_pin), _int2_irq(int2_pin), _spi_type(spi_type)
+{
+    assert (spi);
+    if (cs_pin == NC) 
+    {
+        printf ("ERROR LPS22HBSensor CS MUST NOT BE NC\n\r");       
+        _dev_spi = NULL;
+        _dev_i2c=NULL;
+        return;
+    }       
+    _cs_pin = 1;    
+    _dev_i2c=NULL;
+    
+    if (_spi_type == SPI3W) LSM6DSL_ACC_GYRO_W_SPI_Mode((void *)this, LSM6DSL_ACC_GYRO_SIM_3_WIRE);
+    else LSM6DSL_ACC_GYRO_W_SPI_Mode((void *)this, LSM6DSL_ACC_GYRO_SIM_4_WIRE);
+    
+    LSM6DSL_ACC_GYRO_W_I2C_MASTER_Enable((void *)this, LSM6DSL_ACC_GYRO_MASTER_ON_DISABLED);    
+}
+
 /** Constructor
  * @param i2c object of an helper class which handles the I2C peripheral
  * @param address the address of the component's instance
@@ -52,7 +72,8 @@ LSM6DSLSensor::LSM6DSLSensor(DevI2C *i2c, uint8_t address, PinName int1_pin, Pin
                              _dev_i2c(i2c), _address(address), _cs_pin(NC), _int1_irq(int1_pin), _int2_irq(int2_pin)
 {
     assert (i2c);
-};
+    _dev_spi = NULL;
+}
 
 /**
  * @brief     Initializing the component.
