@@ -2237,10 +2237,10 @@ mems_status_t LSM6DSL_ACC_GYRO_R_IF_Addr_Incr(void *handle, LSM6DSL_ACC_GYRO_IF_
 *******************************************************************************/
 mems_status_t LSM6DSL_ACC_GYRO_W_SPI_Mode(void *handle, LSM6DSL_ACC_GYRO_SIM_t newValue)
 {
-  u8_t value;
+  u8_t value=0x04;
 
-  if( !LSM6DSL_ACC_GYRO_read_reg(handle, LSM6DSL_ACC_GYRO_CTRL3_C, &value, 1)) 
-    return MEMS_ERROR;
+//  if( !LSM6DSL_ACC_GYRO_read_reg(handle, LSM6DSL_ACC_GYRO_CTRL3_C, &value, 1)) 
+//    return MEMS_ERROR;  /** FIXED not possible to read in 3w as deft spi is 4w
 
   value &= ~LSM6DSL_ACC_GYRO_SIM_MASK; 
   value |= newValue;
